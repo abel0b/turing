@@ -1,0 +1,8 @@
+[package]
+name = "turing"
+version = "0.1.0"
+authors = ["Abel <abelcd@protonmail.com>"]
+edition = "2018"
+
+[dependencies]
+crossterm_cursor = "0.1.0"
