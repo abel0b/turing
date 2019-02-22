@@ -8,7 +8,7 @@ use std::process;
 
 fn main() {
     let cursor = crossterm_cursor::cursor();
-    cursor.hide().expect("error");
+    cursor.show().expect("error");
 
     let args : Vec<String> = env::args().collect();
 
@@ -18,9 +18,11 @@ fn main() {
         process::exit(1);
     }
 
-    let tm = TuringMachine::parse("binary_add.tm");
+    let mut tm = TuringMachine::parse(args.get(1).expect("no file provided"));
+    let mut tapes = args[2..].to_vec();
+    tm.reset(&mut tapes);
 
-    cursor.show().expect("error");
+    // tm.step();
 
     // let duration = time::Duration::new(1, 0);
     // cursor.save_position().expect("cant save");
