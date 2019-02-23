@@ -1,3 +1,4 @@
+# todo
 alphabet 0 1
 tapes input work output
 states init q0 q1 q2done
