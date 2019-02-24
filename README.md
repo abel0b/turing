@@ -7,5 +7,8 @@ cargo run <filename> [tapes]
 
 ## Examples
 ```bash
-cargo run examples/palindrom.tm aabbabababbaa
+cargo run examples/palindrome.tm aabbabababbaa
+cargo run examples/binary_add.tm 10111 01010010
+cargo run examples/unary_add.tm 111 11
+cargo run examples/unary_sub.tm 11111 11
 ```
