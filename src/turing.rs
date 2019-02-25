@@ -2,11 +2,13 @@ use std::collections::HashMap;
 use std::fs;
 use std::process;
 
+type TransitionMap = HashMap<(String, Vec<String>), (String, Vec<String>, Vec<Move>)>;
+
 #[derive(Debug)]
 pub struct TuringMachine {
     initial_state: String,
     states:  HashMap<String,State>,
-    transitions: HashMap<(String, Vec<String>), (String, Vec<String>, Vec<Move>)>,
+    transitions: TransitionMap,
     pub current_state: String,
     pub tapes: Vec<Tape>,
 }
@@ -27,7 +29,7 @@ impl Tape {
         }
     }
 
-    pub fn reset(&mut self, content: &String) {
+    pub fn reset(&mut self, content: &str) {
         self.content.clear();
         self.content.push(String::from(">"));
         for s in content.chars() {
@@ -44,8 +46,8 @@ pub enum Move {
 }
 
 impl Move {
-    pub fn new(name : &String) -> Move {
-        match &name[..] {
+    pub fn new(name : &str) -> Move {
+        match name {
             "->" => {
                 Move::Right
             },
@@ -70,11 +72,11 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(name : &String, is_final : bool, is_initial : bool) -> State {
+    pub fn new(name : &str, is_final : bool, is_initial : bool) -> State {
         State {
-            name: name.clone(),
-            is_final: is_final,
-            is_initial: is_initial,
+            name: name.to_string(),
+            is_final,
+            is_initial,
         }
     }
 }
@@ -95,7 +97,7 @@ enum ParserState {
 }
 
 impl TuringMachine {
-    pub fn new(initial_state: String, states: HashMap<String,State>, tapes: Vec<Tape>, transitions: HashMap<(String, Vec<String>), (String, Vec<String>, Vec<Move>)>) -> TuringMachine {
+    pub fn new(initial_state: String, states: HashMap<String,State>, tapes: Vec<Tape>, transitions: TransitionMap) -> TuringMachine {
         TuringMachine {
             initial_state: initial_state.clone(),
             states,
@@ -117,7 +119,7 @@ impl TuringMachine {
         let mut states : HashMap<String,State> = HashMap::new();
         let mut state_is_final = false;
         let mut state_is_initial = false;
-        let mut transitions : HashMap<(String, Vec<String>), (String, Vec<String>, Vec<Move>)> = HashMap::new();
+        let mut transitions : TransitionMap = HashMap::new();
 
         let mut state_input = String::new();
         let mut symbols_input : Vec<String> = Vec::new();
@@ -128,7 +130,7 @@ impl TuringMachine {
 
         for char in program.chars() {
             if char == '\n' {
-                line = line + 1;
+                line += 1;
             }
             match parser_state {
                 ParserState::Begin => match char {
@@ -159,13 +161,8 @@ impl TuringMachine {
                         buffer.push(char);
                     }
                 },
-                ParserState::Comment => match char {
-                    '\n' => {
-                        parser_state = ParserState::Begin;
-                    },
-                    _ => {
-
-                    },
+                ParserState::Comment => if let '\n' = char {
+                    parser_state = ParserState::Begin;
                 },
                 ParserState::Alphabet => match char {
                     ' ' => {
@@ -290,11 +287,8 @@ impl TuringMachine {
                         buffer.push(char);
                     },
                 },
-                ParserState::Transition => match char {
-                    '[' => {
-                        parser_state = ParserState::TransitionOutputState;
-                    },
-                    _ => {},
+                ParserState::Transition => if let '[' = char {
+                    parser_state = ParserState::TransitionOutputState;
                 },
                 ParserState::TransitionOutputState => match char {
                     ' ' => {
@@ -375,15 +369,15 @@ impl TuringMachine {
     }
 
     pub fn reset(&mut self, tapes: &mut Vec<String>) {
-        for n in 0..tapes.len() {
-            self.tapes.get_mut(n).unwrap().reset(tapes.get(n).unwrap())
+        for (n, tape) in tapes.iter().enumerate() {
+            (&mut self.tapes[n]).reset(tape)
         }
     }
 
     pub fn step(&mut self) {
         let mut values : Vec<String> = Vec::new();
         for tape in self.tapes.iter_mut() {
-            values.push(tape.content.get(tape.cursor).unwrap().clone());
+            values.push(tape.content[tape.cursor].clone());
         }
         let current = (self.current_state.clone(), values);
 
@@ -391,26 +385,25 @@ impl TuringMachine {
             Some((next_state, next_values, next_moves)) => {
                 self.current_state = next_state.clone();
                 for i in 0..self.tapes.len() {
-                    let val = next_values.get(i).unwrap();
-                    let tape = self.tapes.get_mut(i).unwrap();
-                    match &val[..] {
+                    let tape = &mut self.tapes[i];
+                    match &next_values[i][..] {
                         "@" => {
 
                         }
                         _ => {
-                            *tape.content.get_mut(tape.cursor).unwrap() = next_values.get(i).unwrap().clone();
+                            tape.content[tape.cursor] = next_values[i].clone();
                         }
                     }
-                    match next_moves.get(i).unwrap() {
+                    match next_moves[i] {
                         Move::Left => {
                             if tape.cursor == 0 {
                                 eprintln!("cursor cant go left");
                                 process::exit(1);
                             }
-                            tape.cursor = tape.cursor - 1;
+                            tape.cursor -= 1;
                         },
                         Move::Right => {
-                            tape.cursor = tape.cursor + 1;
+                            tape.cursor += 1;
                             if tape.cursor == tape.content.len() {
                                 tape.content.push(String::from("_"));
                             }
@@ -429,6 +422,6 @@ impl TuringMachine {
     }
 
     pub fn done(&self) -> bool {
-        self.states.get(&self.current_state).unwrap().is_final
+        self.states[&self.current_state].is_final
     }
 }

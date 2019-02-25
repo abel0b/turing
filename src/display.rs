@@ -17,7 +17,7 @@ impl TuringMachineDisplay {
                 if i == tape.cursor {
                     print!("\x1b[31;1;1m");
                 }
-                print!("{}", tape.content.get(i).unwrap());
+                print!("{}", tape.content[i]);
                 if i == tape.cursor {
                     print!("\x1b[0m");
                 }
@@ -49,17 +49,17 @@ impl TuringMachineDisplay {
         Self::display(turing_machine);
 
         while !turing_machine.done() {
-            icount = icount + 1;
+            icount += 1;
             turing_machine.step();
             thread::sleep(duration);
             cursor.reset_position().expect("cant reset");
             Self::display(turing_machine);
         }
         if (turing_machine.current_state == "no") || (turing_machine.current_state == "reject") {
-            println!("program halted on state {}", Red.bold().paint(&turing_machine.current_state));
+            println!("program halted on state {} after {} instructions", Red.bold().paint(&turing_machine.current_state), icount);
         }
         else {
-            println!("program halted on state {}", Green.bold().paint(&turing_machine.current_state));
+            println!("program halted on state {} after {} instructions", Green.bold().paint(&turing_machine.current_state), icount);
         }
     }
 }
