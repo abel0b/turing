@@ -5,7 +5,7 @@ lint:
     stage: test
     image: rust
     before_script:
-        - cargo component add clippy
+        - rustup component add clippy
         - cargo build -v
     script:
         - cargo clippy -v
