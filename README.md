@@ -1,3 +1,4 @@
+[![pipeline status](https://gitlab.com/abeliam/turing/badges/master/pipeline.svg)](https://gitlab.com/abeliam/turing/commits/master)
 # Turing Machine Simulator
 
 ## Usage
