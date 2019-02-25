@@ -1,13 +1,13 @@
-mod turing;
 mod display;
+mod turing;
 
-use turing::TuringMachine;
 use display::TuringMachineDisplay;
 use std::env;
 use std::process;
+use turing::TuringMachine;
 
 fn main() {
-    let args : Vec<String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
 
     if args.len() < 2 {
         println!("error : no file provided");

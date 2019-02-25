@@ -1,17 +1,27 @@
 use crate::turing::TuringMachine;
 
-use std::{thread, time};
-use crossterm_cursor;
-use ansi_term::Colour::{Red, Green};
+use ansi_term::Colour::{Green, Red};
 use ansi_term::Style;
-use crossterm_terminal::{terminal,ClearType};
+use crossterm_cursor;
+use crossterm_terminal::{terminal, ClearType};
+use std::{thread, time};
 
 pub struct TuringMachineDisplay;
 
 impl TuringMachineDisplay {
-    pub fn display(turing_machine : &mut TuringMachine) {
-        println!("{}: {}          ", Style::new().bold().paint("state"), turing_machine.current_state);
-        let max_tape : usize = turing_machine.tapes.iter().max_by_key(|x| x.content.len()).unwrap().content.len();
+    pub fn display(turing_machine: &mut TuringMachine) {
+        println!(
+            "{}: {}          ",
+            Style::new().bold().paint("state"),
+            turing_machine.current_state
+        );
+        let max_tape: usize = turing_machine
+            .tapes
+            .iter()
+            .max_by_key(|x| x.content.len())
+            .unwrap()
+            .content
+            .len();
         for tape in turing_machine.tapes.iter() {
             for i in 0..tape.content.len() {
                 if i == tape.cursor {
@@ -30,8 +40,7 @@ impl TuringMachineDisplay {
             for n in 0..tape.content.len() {
                 if n == tape.cursor {
                     print!("^");
-                }
-                else {
+                } else {
                     print!(" ");
                 }
             }
@@ -39,7 +48,7 @@ impl TuringMachineDisplay {
         }
     }
 
-    pub fn run(turing_machine : &mut TuringMachine) {
+    pub fn run(turing_machine: &mut TuringMachine) {
         let mut icount = 0;
         let cursor = crossterm_cursor::cursor();
         terminal().clear(ClearType::All).expect("cant clear");
@@ -56,10 +65,17 @@ impl TuringMachineDisplay {
             Self::display(turing_machine);
         }
         if (turing_machine.current_state == "no") || (turing_machine.current_state == "reject") {
-            println!("program halted on state {} after {} instructions", Red.bold().paint(&turing_machine.current_state), icount);
-        }
-        else {
-            println!("program halted on state {} after {} instructions", Green.bold().paint(&turing_machine.current_state), icount);
+            println!(
+                "program halted on state {} after {} instructions",
+                Red.bold().paint(&turing_machine.current_state),
+                icount
+            );
+        } else {
+            println!(
+                "program halted on state {} after {} instructions",
+                Green.bold().paint(&turing_machine.current_state),
+                icount
+            );
         }
     }
 }
